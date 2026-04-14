@@ -1,0 +1,18 @@
+[Unit]
+Description=Demo Spring Boot Service
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/demo
+ExecStart=/usr/bin/java -jar /opt/demo/app.jar --spring.profiles.active=prod
+Restart=always
+RestartSec=5
+User=www-data
+Environment=DB_URL=jdbc:mysql://db-host:3306/funzone?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+Environment=DB_USERNAME=your_user
+Environment=DB_PASSWORD=your_password
+Environment=PORT=8081
+
+[Install]
+WantedBy=multi-user.target
+

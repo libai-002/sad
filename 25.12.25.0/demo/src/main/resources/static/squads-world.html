@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小队天地 - FunZone</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="/dashboard.html" class="brand-logo" style="text-decoration: none;">Fun<span>Zone</span></a>
+            <div class="nav-links">
+                <a href="/dashboard.html">组队大厅</a>
+                <a href="http://localhost:8081/squads.html">我的小队</a>
+                <a href="/squads-world.html" class="active">小队天地</a>
+                <a href="/dynamic.html">动态广场</a>
+            </div>
+        </div>
+        <div class="nav-right">
+            <div class="user-profile">
+                <a href="profile.html" style="display: flex; align-items: center; text-decoration: none; color: inherit;">
+                    <div class="avatar" id="userAvatar">U</div>
+                    <span id="userNameDisplay" style="font-weight: 600; font-size: 0.9rem; margin-left: 0.5rem;">User</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container" style="grid-template-columns: 1fr;">
+        <main class="content-area">
+            <div class="section-header">
+                <h2 style="font-size: 1.2rem;">小队天地</h2>
+                <a href="/dashboard.html" style="color: var(--primary-color); font-size: 0.9rem; text-decoration: none;">返回大厅</a>
+            </div>
+
+            <style>
+                .chat-container { display: grid; grid-template-columns: 280px 1fr; gap: 1rem; }
+                .chat-sidebar { background: white; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.03); overflow: hidden; }
+                .chat-room-item { padding: 0.9rem 1rem; display: flex; align-items: center; gap: 0.6rem; cursor: pointer; border-left: 3px solid transparent; transition: all 0.2s; }
+                .chat-room-item:hover { background: #f8f9fa; }
+                .chat-room-item.active { background: #f0eeff; border-left-color: var(--primary-color); }
+                .chat-main { background: white; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.03); display: grid; grid-template-rows: auto 1fr auto; }
+                .chat-header { padding: 1rem 1.2rem; border-bottom: 1px solid #f1f2f6; display: flex; align-items: center; justify-content: space-between; }
+                .chat-history { padding: 1rem; overflow-y: auto; max-height: 60vh; }
+                .msg { max-width: 70%; padding: 0.6rem 0.8rem; border-radius: 10px; margin-bottom: 0.6rem; font-size: 0.95rem; line-height: 1.4; display: inline-block; }
+                .msg.me { background: #e8f0ff; color: #2d3436; margin-left: auto; }
+                .msg.other { background: #f5f6fa; color: #2d3436; }
+                .msg-meta { font-size: 0.75rem; color: #b2bec3; margin-top: 0.2rem; }
+                .chat-input { display: grid; grid-template-columns: 1fr auto; gap: 0.6rem; padding: 0.8rem; border-top: 1px solid #f1f2f6; }
+                .chat-input input { padding: 0.6rem 0.8rem; border: 1px solid #dfe6e9; border-radius: 8px; outline: none; }
+            </style>
+            <div class="chat-container">
+                <aside class="chat-sidebar">
+                    <div style="padding: 0.9rem 1rem; font-weight: 600; border-bottom: 1px solid #f1f2f6;">我的小队</div>
+                    <div id="chatRooms"></div>
+                </aside>
+                <section class="chat-main">
+                    <div class="chat-header">
+                        <div id="chatTitle" style="font-weight:600;">请选择一个小队开始聊天</div>
+                        <div id="chatMembers" style="color:#636e72; font-size:0.9rem;"></div>
+                    </div>
+                    <div class="chat-history" id="chatHistory"></div>
+                    <div class="chat-input">
+                        <input id="chatMessageInput" type="text" placeholder="输入消息，按 Enter 或点击发送">
+                        <button id="chatSendBtn" class="btn-primary" style="width:auto; padding:0.5rem 1rem;">发送</button>
+                    </div>
+                </section>
+            </div>
+
+            <div id="inviteToolCard" class="sidebar-card" style="margin-top:1rem; display:none;">
+                <div class="sidebar-title">邀请工具</div>
+                <div style="display:flex; gap:0.6rem; align-items:center;">
+                    <button id="genInviteBtn" class="btn-primary" style="width:auto; padding:0.6rem 1rem;">生成随机邀请码</button>
+                    <span id="inviteCodeDisplay" class="tag-mini">未生成</span>
+                    <button id="copyInviteBtn" class="btn-outline" style="width:auto; padding:0.6rem 1rem;">复制</button>
+                    <button id="idJoinToggleBtn" class="btn-outline" style="width:auto; padding:0.6rem 1rem;">关闭ID邀请</button>
+                </div>
+                <div id="inviteTip" class="suggestions" style="text-align:left;">点击生成，将在上方显示并可复制到剪贴板。</div>
+            </div>
+
+            <div class="sidebar-card" style="margin-top:1.5rem;">
+                <div class="sidebar-title">探索更多</div>
+                <div style="display:flex; gap:0.6rem;">
+                    <a href="/dynamic.html" class="btn-primary" style="width:auto; padding:0.6rem 1rem; text-decoration:none;">前往动态广场</a>
+                    <a href="/dashboard.html" class="btn-outline" style="width:auto; padding:0.6rem 1rem; text-decoration:none;">去组队大厅</a>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            const userStr = localStorage.getItem('currentUser');
+            if (!userStr) {
+                alert('请先登录');
+                window.location.href = 'login.html';
+                return;
+            }
+            const user = JSON.parse(userStr);
+            const displayName = user.username || 'User';
+            document.getElementById('userNameDisplay').textContent = displayName;
+            document.getElementById('userAvatar').textContent = displayName.charAt(0).toUpperCase();
+            const userId = user.id || user.userId;
+
+            const roomsEl = document.getElementById('chatRooms');
+            const historyEl = document.getElementById('chatHistory');
+            const titleEl = document.getElementById('chatTitle');
+            const membersEl = document.getElementById('chatMembers');
+            const inputEl = document.getElementById('chatMessageInput');
+            const sendBtn = document.getElementById('chatSendBtn');
+            const idJoinToggleBtn = document.getElementById('idJoinToggleBtn');
+            const inviteTip = document.getElementById('inviteTip');
+
+            let currentRoomId = null;
+            let currentSquad = null;
+
+            async function loadHistory(roomId) {
+                historyEl.innerHTML = '';
+                try {
+                    const resp = await fetch('/api/chat/messages/by-room/' + roomId + '?page=0&size=100');
+                    const list = await resp.json();
+                    if (!resp.ok) {
+                        historyEl.innerHTML = '<div style="color:#e17055;">加载消息失败</div>';
+                        return;
+                    }
+                    list.forEach(m => {
+                        const wrap = document.createElement('div');
+                        wrap.style.display = 'flex';
+                        wrap.style.justifyContent = (m.senderId === userId) ? 'flex-end' : 'flex-start';
+                        const b = document.createElement('div');
+                        b.className = 'msg ' + ((m.senderId === userId) ? 'me' : 'other');
+                        b.textContent = m.content;
+                        const meta = document.createElement('div');
+                        meta.className = 'msg-meta';
+                        meta.textContent = m.senderName + ' · ' + (m.createdAt || '');
+                        const holder = document.createElement('div');
+                        holder.appendChild(b);
+                        holder.appendChild(meta);
+                        wrap.appendChild(holder);
+                        historyEl.appendChild(wrap);
+                    });
+                    historyEl.scrollTop = historyEl.scrollHeight;
+                } catch (e) {
+                    historyEl.innerHTML = '<div style="color:#e17055;">网络错误</div>';
+                }
+            }
+
+            async function selectRoom(squad) {
+                currentSquad = squad;
+                roomsEl.querySelectorAll('.chat-room-item').forEach(el => el.classList.remove('active'));
+                const target = roomsEl.querySelector('[data-room-id="' + squad.id + '"]');
+                if (target) target.classList.add('active');
+                titleEl.textContent = squad.name + '（ID: ' + squad.id + '）';
+                membersEl.textContent = '成员 ' + (squad.currentMembers || 0) + '/' + (squad.maxMembers || 0);
+                try {
+                    const roomResp = await fetch('/api/chat/room/by-squad/' + squad.id);
+                    const room = await roomResp.json();
+                    if (!roomResp.ok) {
+                        historyEl.innerHTML = '<div style="color:#e17055;">创建/获取房间失败</div>';
+                        return;
+                    }
+                    currentRoomId = room.id;
+                    await loadHistory(currentRoomId);
+                    const sResp = await fetch('/api/squads/by-id/' + squad.id);
+                    const sData = await sResp.json();
+                    if (sResp.ok) {
+                        currentSquad = sData;
+                        updateInviteToolVisibility();
+                        updateIdJoinToggleUI();
+                    }
+                } catch (e) {
+                    historyEl.innerHTML = '<div style="color:#e17055;">网络错误</div>';
+                }
+            }
+            
+            function updateIdJoinToggleUI() {
+                const allow = currentSquad && currentSquad.allowIdJoin !== false;
+                const btn = document.getElementById('idJoinToggleBtn');
+                if (!btn) return;
+                btn.textContent = allow ? '关闭ID邀请' : '开启ID邀请';
+                inviteTip.textContent = allow ? '当前允许通过ID加入' : '当前已关闭通过ID加入';
+            }
+            
+            function updateInviteToolVisibility() {
+                const card = document.getElementById('inviteToolCard');
+                if (!card) return;
+                const isOwner = currentSquad && Number(userId) === Number(currentSquad.ownerId);
+                card.style.display = isOwner ? '' : 'none';
+            }
+
+            try {
+                roomsEl.innerHTML = '<div class="chat-room-item">加载中...</div>';
+                const resp = await fetch('/api/squads/joined/' + userId);
+                const list = await resp.json();
+                if (!resp.ok) {
+                    roomsEl.innerHTML = '<div class="chat-room-item">加载失败</div>';
+                } else if (!Array.isArray(list) || list.length === 0) {
+                    roomsEl.innerHTML = '<div class="chat-room-item">尚未加入任何小队</div>';
+                } else {
+                    roomsEl.innerHTML = '';
+                    list.forEach(s => {
+                        const item = document.createElement('div');
+                        item.className = 'chat-room-item';
+                        item.setAttribute('data-room-id', s.id);
+                        item.innerHTML = '<div class="squad-avatar-mini" style="background:#dfe6e9;">👥</div><div><div style="font-weight:600; font-size:0.9rem;">' + s.name + '</div><div style="font-size:0.75rem; color:#b2bec3;">ID: ' + s.id + '</div></div>';
+                        item.addEventListener('click', () => selectRoom(s));
+                        roomsEl.appendChild(item);
+                    });
+                    selectRoom(list[0]);
+                }
+            } catch (e) {
+                roomsEl.innerHTML = '<div class="chat-room-item">网络错误</div>';
+            }
+
+            sendBtn.addEventListener('click', async function() {
+                const text = inputEl.value.trim();
+                if (!text || !currentRoomId) return;
+                try {
+                    const resp = await fetch('/api/chat/messages', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ roomId: currentRoomId, senderId: userId, content: text })
+                    });
+                    const data = await resp.json();
+                    if (resp.ok) {
+                        // 直接在界面追加我方消息
+                        const wrap = document.createElement('div');
+                        wrap.style.display = 'flex';
+                        wrap.style.justifyContent = 'flex-end';
+                        const b = document.createElement('div');
+                        b.className = 'msg me';
+                        b.textContent = data.content;
+                        const meta = document.createElement('div');
+                        meta.className = 'msg-meta';
+                        meta.textContent = (data.senderName || '我') + ' · ' + (data.createdAt || '');
+                        const holder = document.createElement('div');
+                        holder.appendChild(b);
+                        holder.appendChild(meta);
+                        wrap.appendChild(holder);
+                        historyEl.appendChild(wrap);
+                        historyEl.scrollTop = historyEl.scrollHeight;
+                        inputEl.value = '';
+                        inputEl.focus();
+                    } else {
+                        alert('发送失败：' + (data.error || '未知错误'));
+                    }
+                } catch (e) {
+                    alert('发送失败：网络错误');
+                }
+            });
+            inputEl.addEventListener('keydown', function(ev) {
+                if (ev.key === 'Enter') {
+                    sendBtn.click();
+                }
+            });
+
+            const genBtn = document.getElementById('genInviteBtn');
+            const codeEl = document.getElementById('inviteCodeDisplay');
+            const copyBtn = document.getElementById('copyInviteBtn');
+            const tipEl = document.getElementById('inviteTip');
+            genBtn.addEventListener('click', async function() {
+                if (!currentSquad || Number(userId) !== Number(currentSquad.ownerId)) {
+                    tipEl.textContent = '仅队长（owner）可生成邀请码';
+                    return;
+                }
+                if (!currentSquad || !currentSquad.id) {
+                    tipEl.textContent = '请先在左侧选择一个小队';
+                    return;
+                }
+                try {
+                    const resp = await fetch('/api/squads/invite/' + currentSquad.id + '/generate', { method: 'POST' });
+                    const data = await resp.json();
+                    if (resp.ok) {
+                        codeEl.textContent = data.inviteCode || '未生成';
+                        tipEl.textContent = '已为小队（ID: ' + currentSquad.id + '）生成邀请码：' + (data.inviteCode || '');
+                        currentSquad.inviteCode = data.inviteCode;
+                    } else {
+                        tipEl.textContent = '生成失败：' + (data.error || '未知错误');
+                    }
+                } catch (e) {
+                    tipEl.textContent = '生成失败：网络错误';
+                }
+            });
+            copyBtn.addEventListener('click', function() {
+                if (!currentSquad || Number(userId) !== Number(currentSquad.ownerId)) {
+                    tipEl.textContent = '仅队长（owner）可复制邀请码';
+                    return;
+                }
+                const text = codeEl.textContent || '';
+                if (!text || text === '未生成') {
+                    tipEl.textContent = '请先生成邀请码';
+                    return;
+                }
+                navigator.clipboard.writeText(text).then(function() {
+                    tipEl.textContent = '已复制到剪贴板：' + text;
+                }).catch(function() {
+                    tipEl.textContent = '复制失败，请手动选择复制';
+                });
+            });
+            
+            document.getElementById('idJoinToggleBtn').addEventListener('click', async function() {
+                if (!currentSquad || Number(userId) !== Number(currentSquad.ownerId)) {
+                    inviteTip.textContent = '仅队长（owner）可设置是否允许通过ID加入';
+                    return;
+                }
+                if (!currentSquad || !currentSquad.id) {
+                    inviteTip.textContent = '请先在左侧选择一个小队';
+                    return;
+                }
+                const targetAllow = !(currentSquad.allowIdJoin !== false);
+                try {
+                    const resp = await fetch('/api/squads/' + currentSquad.id + '/id-join?allow=' + (targetAllow ? 'true' : 'false'), { method: 'POST' });
+                    const data = await resp.json();
+                    if (resp.ok) {
+                        currentSquad.allowIdJoin = data.allowIdJoin;
+                        updateIdJoinToggleUI();
+                    } else {
+                        inviteTip.textContent = '操作失败：' + (data.error || '未知错误');
+                    }
+                } catch (e) {
+                    inviteTip.textContent = '网络错误';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

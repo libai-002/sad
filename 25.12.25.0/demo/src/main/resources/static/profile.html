@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心 - FunZone</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .profile-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 2rem;
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .profile-menu {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+        }
+
+        .menu-item {
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            color: #636e72;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover {
+            background-color: #f8f9fa;
+            color: var(--primary-color);
+        }
+
+        .menu-item.active {
+            background-color: #f0eeff;
+            color: var(--primary-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .profile-content {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+            min-height: 600px;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid #f1f2f6;
+        }
+
+        .profile-avatar-large {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 3rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .avatar-edit-badge {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 30px;
+            height: 30px;
+            background: var(--text-color);
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: 2px solid white;
+        }
+
+        .form-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .tag-input-area {
+            border: 1px solid #dfe6e9;
+            border-radius: 8px;
+            padding: 0.5rem;
+            min-height: 45px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="dashboard.html" style="text-decoration: none;">
+                <div class="brand-logo" style="font-size: 1.5rem; margin-bottom: 0;">Fun<span>Zone</span></div>
+            </a>
+            <div class="nav-links">
+                <a href="dashboard.html">组队大厅</a>
+                <a href="#">我的小队</a>
+                <a href="/dynamic.html">动态广场</a>
+            </div>
+        </div>
+        <div class="nav-right">
+            <div class="search-box" style="position: relative;">
+                <input type="text" placeholder="搜索小队/游戏..." style="padding: 0.5rem 1rem; border-radius: 20px; border: 1px solid #dfe6e9; outline: none; background: #f8f9fa;">
+            </div>
+            <div class="notification-btn" style="font-size: 1.2rem; color: #636e72; cursor: pointer;">
+                <i class="fas fa-bell"></i>
+            </div>
+            <div class="user-profile">
+                <a href="profile.html" style="display: flex; align-items: center; text-decoration: none; color: inherit;">
+                    <div class="avatar" id="userAvatar">U</div>
+                    <span id="userNameDisplay" style="font-weight: 600; font-size: 0.9rem; margin-left: 0.5rem;">User</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主体内容 -->
+    <div class="profile-container">
+        <!-- 左侧菜单 -->
+        <aside class="profile-menu">
+            <div class="menu-item active" data-target="section-profile">
+                <i class="fas fa-user"></i>
+                个人资料
+            </div>
+            <div class="menu-item" data-target="section-security">
+                <i class="fas fa-shield-alt"></i>
+                账号安全
+            </div>
+            <div class="menu-item" data-target="section-settings">
+                <i class="fas fa-cog"></i>
+                偏好设置
+            </div>
+            <div class="menu-item" data-target="section-friends">
+                <i class="fas fa-user-friends"></i>
+                好友
+            </div>
+        </aside>
+
+        <!-- 右侧内容 -->
+        <main class="profile-content">
+            <!-- 个人资料 -->
+            <div id="section-profile">
+                <h2 style="margin-bottom: 1.5rem;">编辑个人资料</h2>
+                
+                <div class="profile-header">
+                    <div class="profile-avatar-large">
+                        <span id="largeAvatarText">U</span>
+                        <div class="avatar-edit-badge">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 id="profileName" style="margin-bottom: 0.5rem;">User</h3>
+                        <div style="color: #636e72; font-size: 0.9rem;">完善个人资料，让更多小伙伴认识你</div>
+                    </div>
+                </div>
+
+                <form id="profileForm">
+                    <div class="form-group">
+                        <label>昵称</label>
+                        <input type="text" class="form-control" id="nicknameInput" value="User">
+                    </div>
+
+                    <div class="form-group">
+                        <label>个人简介</label>
+                        <textarea class="form-control" id="bioInput" rows="4" placeholder="介绍一下你自己，比如擅长的游戏位置、兴趣爱好等..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>兴趣标签</label>
+                        <div class="tag-input-area" id="tagInputArea">
+                            <input type="text" id="newTagInput" placeholder="+ 添加标签" style="border: none; outline: none; background: transparent; font-size: 0.9rem; padding: 0.3rem;">
+                        </div>
+                        <div style="margin-top: 0.5rem; font-size: 0.85rem; color: #b2bec3;">
+                            推荐: 
+                            <span class="tag-mini" style="cursor: pointer;" onclick="addTag('剧本杀')">剧本杀</span>
+                            <span class="tag-mini" style="cursor: pointer;" onclick="addTag('羽毛球')">羽毛球</span>
+                            <span class="tag-mini" style="cursor: pointer;" onclick="addTag('摄影')">摄影</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>联系方式 (选填)</label>
+                        <input type="text" class="form-control" id="contactInput" placeholder="微信号/QQ号">
+                    </div>
+
+                    <div style="margin-top: 2rem;">
+                        <button type="submit" class="btn-primary" style="width: auto; padding: 0.8rem 2rem;">保存修改</button>
+                        <button type="button" class="btn-outline" style="width: auto; padding: 0.8rem 2rem; margin-left: 1rem; border: 1px solid #dfe6e9; color: #636e72;">取消</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 账号安全 -->
+            <div id="section-security" style="display: none;">
+                <h2 style="margin-bottom: 1.5rem;">账号安全</h2>
+                <form id="securityForm">
+                    <div class="form-group">
+                        <label>旧密码</label>
+                        <input type="password" class="form-control" id="oldPassword" required>
+                        <label style="display:inline-flex;align-items:center;gap:6px;margin-top:6px;font-size:0.85rem;color:#636e72;">
+                            <input type="checkbox" id="toggleOldPwd"> 显示密码
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>新密码</label>
+                        <input type="password" class="form-control" id="newPassword" required>
+                        <label style="display:inline-flex;align-items:center;gap:6px;margin-top:6px;font-size:0.85rem;color:#636e72;">
+                            <input type="checkbox" id="toggleNewPwd"> 显示密码
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>确认新密码</label>
+                        <input type="password" class="form-control" id="confirmPassword" required>
+                        <label style="display:inline-flex;align-items:center;gap:6px;margin-top:6px;font-size:0.85rem;color:#636e72;">
+                            <input type="checkbox" id="toggleConfirmPwd"> 显示密码
+                        </label>
+                    </div>
+                    <button type="submit" class="btn-primary" style="width: auto; padding: 0.8rem 2rem; margin-top: 1rem;">修改密码</button>
+                </form>
+            </div>
+
+            <!-- 偏好设置 -->
+            <div id="section-settings" style="display: none;">
+                <h2 style="margin-bottom: 1.5rem;">偏好设置</h2>
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; justify-content: space-between;">
+                        <span>接收邮件通知</span>
+                        <input type="checkbox" checked>
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; justify-content: space-between;">
+                        <span>公开我的在线状态</span>
+                        <input type="checkbox" checked>
+                    </label>
+                </div>
+                <button class="btn-primary" style="width: auto; padding: 0.8rem 2rem; margin-top: 1rem;">保存设置</button>
+            </div>
+            
+            <div id="section-friends" style="display: none;">
+                <h2 style="margin-bottom: 1.5rem;">好友列表</h2>
+                <div class="form-group" style="display:flex;gap:8px;align-items:center;">
+                    <input type="text" class="form-control" id="friendUsernameInput" placeholder="输入好友用户名">
+                    <button id="addFriendBtn" class="btn-primary" style="width:auto;padding:0.6rem 1rem;">添加好友</button>
+                </div>
+                <div id="friendList" style="margin-top:1rem;"></div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/sunrays.js"></script>
+    <script>
+        let currentTags = [];
+
+        // 全局函数：添加标签
+        window.addTag = function(tagName) {
+            tagName = tagName.trim();
+            if (tagName && !currentTags.includes(tagName)) {
+                currentTags.push(tagName);
+                renderTags();
+            }
+        };
+
+        // 全局函数：移除标签
+        window.removeTag = function(tagName) {
+            currentTags = currentTags.filter(t => t !== tagName);
+            renderTags();
+        };
+
+        function renderTags() {
+            const container = document.getElementById('tagInputArea');
+            const input = document.getElementById('newTagInput');
+            
+            // 清除现有标签（保留输入框）
+            const existingTags = container.querySelectorAll('.tag');
+            existingTags.forEach(t => t.remove());
+
+            // 重新插入标签
+            currentTags.forEach(tag => {
+                const tagEl = document.createElement('span');
+                tagEl.className = 'tag';
+                tagEl.innerHTML = `${tag} <i class="fas fa-times" style="margin-left: 5px; cursor: pointer;" onclick="removeTag('${tag}')"></i>`;
+                container.insertBefore(tagEl, input);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // 检查登录状态
+            const userStr = localStorage.getItem('currentUser');
+            if (!userStr) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const user = JSON.parse(userStr);
+            const userId = user.userId || user.id; // 兼容不同字段名
+
+            // 获取用户最新数据
+            fetch(`/api/users/${userId}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('获取用户信息失败');
+                    return response.json();
+                })
+                .then(userData => {
+                    // 更新页面显示
+                    const displayName = userData.nickname || userData.username;
+                    document.getElementById('userNameDisplay').textContent = displayName;
+                    document.getElementById('profileName').textContent = displayName;
+                    
+                    // 填充表单
+                    document.getElementById('nicknameInput').value = userData.nickname || '';
+                    document.getElementById('bioInput').value = userData.bio || '';
+                    document.getElementById('contactInput').value = userData.contactInfo || '';
+                    
+                    // 头像处理
+                    const firstChar = displayName.charAt(0).toUpperCase();
+                    document.getElementById('userAvatar').textContent = firstChar;
+                    document.getElementById('largeAvatarText').textContent = firstChar;
+
+                    // 标签处理
+                    if (userData.tags) {
+                        currentTags = userData.tags.split(',').filter(t => t.trim());
+                        renderTags();
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('无法加载用户信息，请重试');
+                });
+
+            // 标签输入框回车处理
+            document.getElementById('newTagInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addTag(this.value);
+                    this.value = '';
+                }
+            });
+
+            // Tab 切换逻辑
+            const menuItems = document.querySelectorAll('.menu-item');
+            const sections = {
+                'section-profile': document.getElementById('section-profile'),
+                'section-security': document.getElementById('section-security'),
+                'section-settings': document.getElementById('section-settings'),
+                'section-friends': document.getElementById('section-friends')
+            };
+
+            menuItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    // 移除所有 active 类
+                    menuItems.forEach(i => i.classList.remove('active'));
+                    // 添加当前 active 类
+                    item.classList.add('active');
+
+                    // 隐藏所有 section
+                    Object.values(sections).forEach(s => s.style.display = 'none');
+                    // 显示目标 section
+                    const targetId = item.getAttribute('data-target');
+                    if (sections[targetId]) {
+                        sections[targetId].style.display = 'block';
+                    }
+                });
+            });
+
+            // 保存个人资料
+            document.getElementById('profileForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const updateData = {
+                    nickname: document.getElementById('nicknameInput').value,
+                    bio: document.getElementById('bioInput').value,
+                    contactInfo: document.getElementById('contactInput').value,
+                    tags: currentTags.join(',')
+                };
+                
+                console.log('Saving profile data:', updateData);
+
+                fetch(`/api/users/${userId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updateData)
+                })
+                .then(async response => {
+                    if (response.ok) {
+                        const updatedUser = await response.json();
+                        console.log('Save success, updated user:', updatedUser);
+                        alert('保存成功！');
+                        // 更新本地显示的名称
+                        const newName = updatedUser.nickname || updatedUser.username;
+                        document.getElementById('userNameDisplay').textContent = newName;
+                        document.getElementById('profileName').textContent = newName;
+                    } else {
+                        const error = await response.json();
+                        console.error('Save failed:', error);
+                        alert('保存失败: ' + (error.error || '未知错误'));
+                    }
+                })
+                .catch(err => {
+                    console.error('Network Error:', err);
+                    alert('网络错误，请稍后重试');
+                });
+            });
+
+            // 修改密码
+            document.getElementById('securityForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const oldPassword = document.getElementById('oldPassword').value;
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+
+                if (newPassword !== confirmPassword) {
+                    alert('两次输入的新密码不一致');
+                    return;
+                }
+                if (newPassword.length < 8) {
+                    alert('新密码长度至少为8位');
+                    return;
+                }
+                if (newPassword === oldPassword) {
+                    alert('新密码不能与旧密码相同');
+                    return;
+                }
+                const userStr2 = localStorage.getItem('currentUser');
+                if (userStr2) {
+                    const u = JSON.parse(userStr2);
+                    if (u.username && newPassword.toLowerCase() === u.username.toLowerCase()) {
+                        alert('新密码不能与用户名相同');
+                        return;
+                    }
+                }
+                const strong = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+                if (!strong.test(newPassword)) {
+                    alert('新密码需包含大小写字母和数字');
+                    return;
+                }
+
+                fetch(`/api/users/${userId}/password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        oldPassword: oldPassword,
+                        newPassword: newPassword
+                    })
+                })
+                .then(async response => {
+                    if (response.ok) {
+                        alert('密码修改成功，请重新登录');
+                        localStorage.removeItem('currentUser');
+                        window.location.href = 'login.html';
+                    } else {
+                        const error = await response.json();
+                        alert('修改失败: ' + (error.error || '未知错误'));
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('网络错误，请稍后重试');
+                });
+            });
+
+            document.getElementById('toggleOldPwd').addEventListener('change', function() {
+                document.getElementById('oldPassword').type = this.checked ? 'text' : 'password';
+            });
+            document.getElementById('toggleNewPwd').addEventListener('change', function() {
+                document.getElementById('newPassword').type = this.checked ? 'text' : 'password';
+            });
+            document.getElementById('toggleConfirmPwd').addEventListener('change', function() {
+                document.getElementById('confirmPassword').type = this.checked ? 'text' : 'password';
+            });
+            
+            function loadFriends() {
+                fetch(`/api/users/${userId}/friends`)
+                    .then(r => r.json())
+                    .then(list => {
+                        const container = document.getElementById('friendList');
+                        container.innerHTML = '';
+                        const count = document.createElement('div');
+                        count.style.marginBottom = '0.5rem';
+                        count.textContent = `当前好友：${list.length}/100`;
+                        container.appendChild(count);
+                        list.forEach(f => {
+                            const item = document.createElement('div');
+                            item.style.display = 'flex';
+                            item.style.alignItems = 'center';
+                            item.style.justifyContent = 'space-between';
+                            item.style.padding = '0.6rem';
+                            item.style.border = '1px solid #dfe6e9';
+                            item.style.borderRadius = '8px';
+                            item.style.marginBottom = '0.5rem';
+                            const left = document.createElement('div');
+                            left.style.display = 'flex';
+                            left.style.alignItems = 'center';
+                            left.style.gap = '10px';
+                            const avatar = document.createElement('div');
+                            avatar.className = 'avatar';
+                            avatar.textContent = (f.nickname || f.username || '').charAt(0).toUpperCase();
+                            const name = document.createElement('div');
+                            name.textContent = f.nickname || f.username;
+                            left.appendChild(avatar);
+                            left.appendChild(name);
+                            const removeBtn = document.createElement('button');
+                            removeBtn.className = 'btn-outline';
+                            removeBtn.style.width = 'auto';
+                            removeBtn.style.padding = '0.4rem 0.8rem';
+                            removeBtn.textContent = '删除';
+                            removeBtn.addEventListener('click', () => {
+                                fetch(`/api/users/${userId}/friends/${f.id}`, { method: 'DELETE' })
+                                    .then(async resp => {
+                                        if (resp.ok) {
+                                            loadFriends();
+                                        } else {
+                                            const err = await resp.json();
+                                            alert(err.error || '删除失败');
+                                        }
+                                    }).catch(() => alert('网络错误'));
+                            });
+                            item.appendChild(left);
+                            item.appendChild(removeBtn);
+                            container.appendChild(item);
+                        });
+                    });
+            }
+            
+            document.getElementById('addFriendBtn').addEventListener('click', function() {
+                const uname = document.getElementById('friendUsernameInput').value.trim();
+                if (!uname) return;
+                fetch(`/api/users/${userId}/friends`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: uname })
+                }).then(async resp => {
+                    if (resp.ok) {
+                        document.getElementById('friendUsernameInput').value = '';
+                        loadFriends();
+                    } else {
+                        const err = await resp.json();
+                        alert(err.error || '添加失败');
+                    }
+                }).catch(() => alert('网络错误'));
+            });
+            
+            loadFriends();
+
+             // 绑定登出功能 (复用 dashboard 的逻辑)
+             const logoutBtn = document.createElement('a');
+            logoutBtn.href = "#";
+            logoutBtn.textContent = "退出";
+            logoutBtn.style.marginLeft = "1rem";
+            logoutBtn.style.color = "#636e72";
+            logoutBtn.style.textDecoration = "none";
+            logoutBtn.style.fontSize = "0.9rem";
+            
+            logoutBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                if(confirm('确定要退出登录吗？')) {
+                    localStorage.removeItem('currentUser');
+                    window.location.href = 'index.html';
+                }
+            });
+            
+            document.querySelector('.user-profile').appendChild(logoutBtn);
+        });
+    </script>
+</body>
+</html>

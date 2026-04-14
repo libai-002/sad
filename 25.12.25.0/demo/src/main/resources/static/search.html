@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>搜索 - FunZone</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --search-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 6px 16px rgba(0,0,0,0.08); }
+        body { display:flex; align-items:center; justify-content:center; min-height:100vh; background:#fff; }
+        .search-home { width:100%; max-width:700px; text-align:center; padding:0 1rem; }
+        .brand { font-size:3rem; font-weight:700; letter-spacing:0.5px; margin-bottom:1.5rem; }
+        .brand span { color: var(--primary-color); }
+        .search-box { display:flex; align-items:center; gap:0.6rem; border:1px solid #dfe6e9; border-radius:999px; padding:0.6rem 1rem; box-shadow: var(--search-shadow); }
+        .search-box i { color:#b2bec3; }
+        .search-input { flex:1; border:none; outline:none; font-size:1rem; }
+        .actions { margin-top:1.2rem; display:flex; gap:0.8rem; justify-content:center; }
+        .actions .btn-primary, .actions .btn-outline { padding:0.6rem 1rem; }
+        .hot { margin-top:1.2rem; color:#636e72; font-size:0.9rem; }
+        .chips { margin-top:0.6rem; display:flex; gap:0.5rem; justify-content:center; flex-wrap:wrap; }
+        .chip { border:1px solid #dfe6e9; border-radius:999px; padding:0.3rem 0.8rem; font-size:0.85rem; cursor:pointer; }
+        .footer-links { margin-top:2rem; color:#b2bec3; font-size:0.85rem; }
+        @media (max-width:480px) { .brand{font-size:2.2rem;} }
+    </style>
+</head>
+<body>
+    <div class="search-home">
+        <div class="brand">Fun<span>Zone</span></div>
+        <div class="search-box">
+            <i class="fas fa-magnifying-glass"></i>
+            <input id="kw" class="search-input" type="text" placeholder="搜索小队、游戏或标签">
+            <i class="fas fa-keyboard"></i>
+        </div>
+        <div class="actions">
+            <button id="searchBtn" class="btn-primary">搜索</button>
+            <button id="luckyBtn" class="btn-outline">手气不错</button>
+        </div>
+        <div class="hot">热门搜索</div>
+        <div class="chips" id="chips">
+            <div class="chip">王者荣耀</div>
+            <div class="chip">剧本杀</div>
+            <div class="chip">羽毛球</div>
+            <div class="chip">摄影</div>
+            <div class="chip">学习打卡</div>
+        </div>
+        <div class="footer-links">
+            <a href="/dashboard.html" style="text-decoration:none; color:var(--primary-color);">返回大厅</a>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const input = document.getElementById('kw');
+            const searchBtn = document.getElementById('searchBtn');
+            const luckyBtn = document.getElementById('luckyBtn');
+            function goSearch(q) {
+                const kw = (q !== undefined ? q : input.value).trim();
+                if (!kw) {
+                    input.focus();
+                    return;
+                }
+                window.location.href = '/search/index.html?q=' + encodeURIComponent(kw);
+            }
+            searchBtn.addEventListener('click', function() { goSearch(); });
+            input.addEventListener('keydown', function(e) { if (e.key === 'Enter') goSearch(); });
+            luckyBtn.addEventListener('click', function() {
+                const samples = ['王者荣耀','剧本杀','羽毛球','摄影','学习'];
+                const kw = samples[Math.floor(Math.random() * samples.length)];
+                goSearch(kw);
+            });
+            document.querySelectorAll('#chips .chip').forEach(function(el) {
+                el.addEventListener('click', function(){ goSearch(el.textContent); });
+            });
+            const params = new URLSearchParams(window.location.search);
+            const pre = (params.get('q') || '').trim();
+            if (pre) {
+                input.value = pre;
+                goSearch(pre);
+            }
+        });
+    </script>
+</body>
+</html>

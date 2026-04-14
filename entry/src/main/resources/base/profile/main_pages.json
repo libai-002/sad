@@ -1,0 +1,9 @@
+{
+  "src": [
+    "pages/SplashScreen",
+    "pages/Index",
+    "pages/Register",
+    "pages/MainPage",
+    "pages/SearchPage"
+  ]
+}

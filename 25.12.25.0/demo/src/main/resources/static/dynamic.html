@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>动态广场 - FunZone</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="/dashboard.html" class="brand-logo" style="text-decoration: none;">Fun<span>Zone</span></a>
+            <div class="nav-links">
+                <a href="/dashboard.html">组队大厅</a>
+                <a href="http://localhost:8081/squads.html">我的小队</a>
+                <a href="/dynamic.html" class="active">动态广场</a>
+            </div>
+        </div>
+        <div class="nav-right">
+            <div class="user-profile">
+                <a href="/profile.html" style="display: flex; align-items: center; text-decoration: none; color: inherit;">
+                    <div class="avatar" id="userAvatar">U</div>
+                    <span id="userNameDisplay" style="font-weight: 600; font-size: 0.9rem; margin-left: 0.5rem;">User</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container" style="grid-template-columns: 1fr;">
+        <main class="content-area">
+            <div class="section-header">
+                <h2 style="font-size: 1.2rem;">小队组队邀请</h2>
+                <a href="/dashboard.html" style="color: var(--primary-color); font-size: 0.9rem; text-decoration: none;">返回大厅</a>
+            </div>
+
+            <div class="squad-grid">
+                <div id="square-chat" class="squad-card" style="grid-column: 1 / -1;">
+                    <div class="squad-cover" style="background: linear-gradient(135deg, #6c5ce7, #0984e3);">
+                        <div class="squad-status recruiting">广场聊天室</div>
+                    </div>
+                    <div class="squad-body">
+                        <div class="squad-avatar-main">💬</div>
+                        <div class="squad-name">实时交流与邀请</div>
+                        <div class="squad-desc">选择聊天目标房间，发送文本消息或插入邀请信息。</div>
+                        <div style="display:flex; gap:0.6rem; margin-bottom:0.6rem; align-items:center;">
+                            <label style="font-size:0.85rem; color:#636e72;">聊天目标</label>
+                            <select id="roomSelect" class="form-control" style="width:240px;">
+                                <option value="">本地广场（仅本机）</option>
+                            </select>
+                            <button id="refreshRoom" class="btn-outline" style="padding:0.4rem 0.8rem;">刷新消息</button>
+                        </div>
+                        <div style="display:flex; gap:0.6rem; margin-bottom:0.6rem; align-items:center;">
+                            <label style="font-size:0.85rem; color:#636e72;">插入邀请</label>
+                            <select id="inviteSelect" class="form-control" style="width:240px;">
+                                <option value="">选择你创建的小队</option>
+                            </select>
+                            <button id="insertInvite" class="btn-outline" style="padding:0.4rem 0.8rem;">插入到消息</button>
+                        </div>
+                        <div id="chatMessages" class="suggestions" style="min-height:220px; background:#f8f9fa; border:1px solid #dfe6e9; border-radius:8px; padding:0.8rem; overflow:auto;"></div>
+                        <div style="display:flex; gap:0.6rem; margin-top:0.8rem;">
+                            <input id="chatInput" class="form-control" type="text" placeholder="输入消息内容..." />
+                            <button id="sendMsg" class="btn-primary" style="width:auto; padding:0.6rem 1rem;">发送</button>
+                        </div>
+                        <div id="chatHint" class="suggestions" style="text-align:left;">当前为本地广场模式，选择上方房间即可与服务器交互。</div>
+                    </div>
+                </div>
+                
+                <div id="square-post" class="squad-card" style="grid-column: 1 / -1;">
+                    <div class="squad-cover" style="background: linear-gradient(135deg, #00cec9, #00b894);">
+                        <div class="squad-status recruiting">发布动态</div>
+                    </div>
+                    <div class="squad-body">
+                        <div class="squad-avatar-main">📝</div>
+                        <div class="squad-name">分享你的瞬间</div>
+                        <div class="form-group">
+                            <label>内容</label>
+                            <textarea id="postText" class="form-control" rows="3" placeholder="写点什么..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>图片链接（可选）</label>
+                            <input id="postImage" class="form-control" type="url" placeholder="http://..." />
+                        </div>
+                        <div class="form-group">
+                            <label>标签（逗号分隔，可选）</label>
+                            <input id="postTags" class="form-control" type="text" placeholder="学习,打卡" />
+                        </div>
+                        <div style="display:flex; gap:0.6rem;">
+                            <button id="publishPost" class="btn-primary" style="width:auto; padding:0.6rem 1rem;">发布</button>
+                            <button id="clearComposer" class="btn-outline" style="width:auto; padding:0.6rem 1rem;">清空</button>
+                        </div>
+                        <div id="publishHint" class="suggestions" style="text-align:left;">发布到本地广场，仅本机可见（示例模式）。</div>
+                    </div>
+                </div>
+                
+                <div id="square-feed" class="squad-card" style="grid-column: 1 / -1;">
+                    <div class="squad-cover" style="background: linear-gradient(135deg, #fdcb6e, #e17055);">
+                        <div class="squad-status recruiting">动态列表</div>
+                    </div>
+                    <div class="squad-body">
+                        <div class="squad-avatar-main">📰</div>
+                        <div class="squad-name">最新动态</div>
+                        <div id="feedList" class="suggestions" style="min-height:220px; background:#f8f9fa; border:1px solid #dfe6e9; border-radius:8px; padding:0.8rem; overflow:auto;"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const userStr = localStorage.getItem('currentUser');
+            if (!userStr) {
+                alert('请先登录');
+                window.location.href = '/login.html';
+                return;
+            }
+            const user = JSON.parse(userStr);
+            const username = user.username;
+            const userId = user.id;
+            document.getElementById('userNameDisplay').textContent = username;
+            document.getElementById('userAvatar').textContent = (username || 'U').charAt(0).toUpperCase();
+
+
+            const roomSelect = document.getElementById('roomSelect');
+            const inviteSelect = document.getElementById('inviteSelect');
+            const chatMessages = document.getElementById('chatMessages');
+            const chatInput = document.getElementById('chatInput');
+            const chatHint = document.getElementById('chatHint');
+            let currentRoomId = null;
+            let pollingTimer = null;
+            function renderLocalMessages() {
+                const list = JSON.parse(localStorage.getItem('squareChat') || '[]');
+                if (!list.length) {
+                    chatMessages.innerHTML = '<div style="color:#b2bec3;">暂无本地消息</div>';
+                    return;
+                }
+                chatMessages.innerHTML = list.map(function(m) {
+                    return '<div style="padding:0.4rem 0;">' +
+                        '<span style="color:#636e72;">' + m.user + '</span>' +
+                        '<span style="color:#b2bec3; margin:0 0.4rem;">•</span>' +
+                        '<span>' + m.text + '</span>' +
+                        '</div>';
+                }).join('');
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            async function renderRemoteMessages(roomId) {
+                try {
+                    const resp = await fetch('/api/chat/messages/by-room/' + roomId + '?page=0&size=50');
+                    const data = await resp.json();
+                    if (!resp.ok) {
+                        chatMessages.innerHTML = '<div style="color:#e17055;">加载消息失败</div>';
+                        return;
+                    }
+                    if (!Array.isArray(data) || data.length === 0) {
+                        chatMessages.innerHTML = '<div style="color:#b2bec3;">暂无消息</div>';
+                        return;
+                    }
+                    chatMessages.innerHTML = data.map(function(m) {
+                        return '<div style="padding:0.4rem 0;">' +
+                            '<span style="color:#636e72;">' + (m.senderName || ('用户' + m.senderId)) + '</span>' +
+                            '<span style="color:#b2bec3; margin:0 0.4rem;">•</span>' +
+                            '<span>' + m.content + '</span>' +
+                            '</div>';
+                    }).join('');
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                } catch (e) {
+                    chatMessages.innerHTML = '<div style="color:#e17055;">网络错误</div>';
+                }
+            }
+            function startPolling() {
+                if (pollingTimer) clearInterval(pollingTimer);
+                if (!currentRoomId) return;
+                pollingTimer = setInterval(function() {
+                    renderRemoteMessages(currentRoomId);
+                }, 3000);
+            }
+            async function onRoomSelectChange() {
+                const val = roomSelect.value;
+                if (!val) {
+                    currentRoomId = null;
+                    chatHint.textContent = '当前为本地广场模式，选择上方房间即可与服务器交互。';
+                    renderLocalMessages();
+                    if (pollingTimer) { clearInterval(pollingTimer); pollingTimer = null; }
+                    return;
+                }
+                try {
+                    const resp = await fetch('/api/chat/room/by-squad/' + val);
+                    const room = await resp.json();
+                    if (!resp.ok) {
+                        chatHint.textContent = '进入房间失败';
+                        return;
+                    }
+                    currentRoomId = room.id;
+                    chatHint.textContent = '已连接到房间：' + (room.name || ('ID ' + room.id));
+                    await renderRemoteMessages(currentRoomId);
+                    startPolling();
+                } catch (e) {
+                    chatHint.textContent = '网络错误';
+                }
+            }
+            async function loadJoinedForSelect() {
+                try {
+                    const resp = await fetch('/api/squads/joined/' + userId);
+                    const data = await resp.json();
+                    if (resp.ok && Array.isArray(data)) {
+                        data.forEach(function(s) {
+                            const opt = document.createElement('option');
+                            opt.value = s.id;
+                            opt.textContent = s.name + '（' + s.id + '）';
+                            roomSelect.appendChild(opt);
+                        });
+                    }
+                } catch (e) {}
+            }
+            async function loadOwnerForInviteSelect() {
+                try {
+                    const resp = await fetch('/api/squads/by-owner/' + userId);
+                    const data = await resp.json();
+                    if (resp.ok && Array.isArray(data)) {
+                        data.forEach(function(s) {
+                            const opt = document.createElement('option');
+                            opt.value = s.id;
+                            opt.textContent = (s.name || '未命名') + '（' + s.id + '）';
+                            inviteSelect.appendChild(opt);
+                        });
+                    }
+                } catch (e) {}
+            }
+            document.getElementById('refreshRoom').addEventListener('click', function() {
+                if (currentRoomId) renderRemoteMessages(currentRoomId); else renderLocalMessages();
+            });
+            roomSelect.addEventListener('change', onRoomSelectChange);
+            document.getElementById('insertInvite').addEventListener('click', function() {
+                const val = inviteSelect.value;
+                if (!val) return;
+                const text = inviteSelect.options[inviteSelect.selectedIndex].textContent;
+                const inviteText = '邀请加入 ' + text + '，ID：' + val;
+                chatInput.value = chatInput.value ? (chatInput.value + ' ' + inviteText) : inviteText;
+            });
+            document.getElementById('sendMsg').addEventListener('click', async function() {
+                const content = chatInput.value.trim();
+                if (!content) return;
+                if (!currentRoomId) {
+                    const list = JSON.parse(localStorage.getItem('squareChat') || '[]');
+                    list.push({ user: username, text: content, ts: Date.now() });
+                    localStorage.setItem('squareChat', JSON.stringify(list.slice(-200)));
+                    chatInput.value = '';
+                    renderLocalMessages();
+                    return;
+                }
+                try {
+                    const resp = await fetch('/api/chat/messages', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ roomId: currentRoomId, senderId: userId, content })
+                    });
+                    const data = await resp.json();
+                    if (resp.ok) {
+                        chatInput.value = '';
+                        await renderRemoteMessages(currentRoomId);
+                    } else {
+                        chatHint.textContent = (data.error || '发送失败');
+                    }
+                } catch (e) {
+                    chatHint.textContent = '网络错误';
+                }
+            });
+            loadJoinedForSelect();
+            loadOwnerForInviteSelect();
+            renderLocalMessages();
+            
+            function readFeed() {
+                return JSON.parse(localStorage.getItem('squareFeed') || '[]');
+            }
+            function writeFeed(list) {
+                localStorage.setItem('squareFeed', JSON.stringify(list.slice(0, 300)));
+            }
+            function renderFeed() {
+                const list = readFeed();
+                if (!list.length) {
+                    document.getElementById('feedList').innerHTML = '<div style="color:#b2bec3;">暂无动态</div>';
+                    return;
+                }
+                const html = list.map(function(p, idx) {
+                    const tags = (p.tags || []).map(function(t){ return '<span class="tag-mini" style="margin-right:0.4rem;">#' + t + '</span>'; }).join('');
+                    const img = p.image ? ('<div style="margin-top:0.4rem;"><img src="' + p.image + '" alt="" style="max-width:100%; border-radius:8px;"></div>') : '';
+                    const cboxId = 'cbox_' + idx;
+                    return '<div style="padding:0.6rem; border-bottom:1px solid #eee;">' +
+                        '<div style="font-weight:600; font-size:0.9rem;">' + (p.userName || ('用户' + p.userId)) + '</div>' +
+                        '<div style="font-size:0.85rem; margin-top:0.2rem;">' + p.text + '</div>' +
+                        img +
+                        '<div style="margin-top:0.4rem;">' + tags + '</div>' +
+                        '<div style="display:flex; gap:0.6rem; align-items:center; margin-top:0.4rem;">' +
+                            '<button class="btn-outline like-btn" data-idx="' + idx + '" style="padding:0.3rem 0.6rem;">👍 ' + (p.likes || 0) + '</button>' +
+                            '<input id="' + cboxId + '" class="form-control comment-input" data-idx="' + idx + '" type="text" placeholder="评论..." style="flex:1;">' +
+                            '<button class="btn-outline comment-btn" data-idx="' + idx + '" style="padding:0.3rem 0.6rem;">发表</button>' +
+                        '</div>' +
+                        '<div class="suggestions" style="margin-top:0.4rem;">' + (p.comments || []).map(function(c){ return '<div style="padding:0.2rem 0;"><span style="color:#636e72;">' + c.user + '：</span>' + c.text + '</div>'; }).join('') + '</div>' +
+                    '</div>';
+                }).join('');
+                document.getElementById('feedList').innerHTML = html;
+                document.querySelectorAll('.like-btn').forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        const idx = Number(btn.getAttribute('data-idx'));
+                        const list = readFeed();
+                        if (!list[idx]) return;
+                        list[idx].likes = (list[idx].likes || 0) + 1;
+                        writeFeed(list);
+                        renderFeed();
+                    });
+                });
+                document.querySelectorAll('.comment-btn').forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        const idx = Number(btn.getAttribute('data-idx'));
+                        const list = readFeed();
+                        if (!list[idx]) return;
+                        const input = document.querySelector('input.comment-input[data-idx="' + idx + '"]');
+                        const text = (input && input.value || '').trim();
+                        if (!text) return;
+                        list[idx].comments = list[idx].comments || [];
+                        list[idx].comments.push({ user: username, text });
+                        writeFeed(list);
+                        renderFeed();
+                    });
+                });
+            }
+            document.getElementById('publishPost').addEventListener('click', function() {
+                const text = document.getElementById('postText').value.trim();
+                const image = document.getElementById('postImage').value.trim();
+                const tags = document.getElementById('postTags').value.split(',').map(function(t){ return t.trim(); }).filter(Boolean);
+                if (!text) {
+                    document.getElementById('publishHint').textContent = '请输入内容';
+                    return;
+                }
+                const list = readFeed();
+                list.unshift({ userId, userName: username, text, image, tags, likes: 0, comments: [], ts: Date.now() });
+                writeFeed(list);
+                document.getElementById('postText').value = '';
+                document.getElementById('postImage').value = '';
+                document.getElementById('postTags').value = '';
+                document.getElementById('publishHint').textContent = '发布成功';
+                renderFeed();
+            });
+            document.getElementById('clearComposer').addEventListener('click', function() {
+                document.getElementById('postText').value = '';
+                document.getElementById('postImage').value = '';
+                document.getElementById('postTags').value = '';
+                document.getElementById('publishHint').textContent = '已清空';
+            });
+            renderFeed();
+            });
+        </script>
+</body>
+</html>

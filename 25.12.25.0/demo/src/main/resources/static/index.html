@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FunZone - 首页</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .home-container {
+            max-width: 600px;
+        }
+        .features {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .feature-card {
+            background: #f1f2f6;
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body class="auth-body">
+    <div class="auth-container home-container">
+        <div class="brand-logo" style="font-size: 3rem;">Fun<span>Zone</span></div>
+        <h1>欢迎来到 FunZone</h1>
+        <p class="auth-subtitle">连接你我，分享快乐</p>
+        
+        <div style="margin-top: 2rem;">
+            <a href="login.html"><button class="btn-primary">立即登录</button></a>
+            <a href="register.html"><button class="btn-primary" style="background-color: white; color: var(--primary-color); border: 2px solid var(--primary-color); margin-top: 1rem;">注册新账号</button></a>
+        </div>
+
+        <div class="features">
+            <div class="feature-card">🎮 游戏互动</div>
+            <div class="feature-card">💬 实时聊天</div>
+            <div class="feature-card">📸 动态分享</div>
+        </div>
+    </div>
+</body>
+</html>

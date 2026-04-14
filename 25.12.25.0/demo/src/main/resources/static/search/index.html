@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>搜索 - FunZone</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="/dashboard.html" class="brand-logo" style="text-decoration: none;">Fun<span>Zone</span></a>
+            <div class="nav-links">
+                <a href="/dashboard.html">组队大厅</a>
+                <a href="/dynamic.html">动态广场</a>
+                <a href="/search/index.html" class="active">搜索</a>
+            </div>
+        </div>
+        <div class="nav-right">
+            <div class="search-box" style="position: relative;">
+                <input id="q" type="text" placeholder="搜索小队/游戏..." style="padding: 0.5rem 1rem; border-radius: 20px; border: 1px solid #dfe6e9; outline: none; background: #f8f9fa;">
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container" style="grid-template-columns: 1fr;">
+        <main class="content-area">
+            <div class="section-header">
+                <h2 style="font-size:1.2rem;">搜索</h2>
+                <a href="/dashboard.html" style="color: var(--primary-color); font-size: 0.9rem; text-decoration: none;">返回大厅</a>
+            </div>
+
+            <div class="sidebar-card">
+                <div class="sidebar-title">快速搜索</div>
+                <div style="display:flex; gap:0.6rem;">
+                    <input id="kw" class="form-control" type="text" placeholder="请输入关键字">
+                    <button id="go" class="btn-primary">搜索</button>
+                </div>
+                <div id="tip" class="suggestions">输入关键字后点击“搜索”。</div>
+            </div>
+
+            <div class="squad-grid" id="results"></div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const input = document.getElementById('kw');
+            const btn = document.getElementById('go');
+            const results = document.getElementById('results');
+            async function renderByTag(kw) {
+                results.innerHTML = '';
+                if (!kw) {
+                    document.getElementById('tip').textContent = '请输入关键字';
+                    return;
+                }
+                document.getElementById('tip').textContent = '搜索中...';
+                try {
+                    const resp = await fetch('/api/squads/search-by-tag?tag=' + encodeURIComponent(kw));
+                    const list = await resp.json();
+                    if (!resp.ok) {
+                        document.getElementById('tip').textContent = '搜索失败';
+                        return;
+                    }
+                    if (!Array.isArray(list) || list.length === 0) {
+                        document.getElementById('tip').textContent = '未找到相关小队';
+                        return;
+                    }
+                    document.getElementById('tip').textContent = '找到 ' + list.length + ' 个结果';
+                    list.forEach(s => {
+                        const tags = (s.tags || '').split(/[ ,，]+/).filter(Boolean);
+                        const card = document.createElement('div');
+                        card.className = 'squad-card';
+                        card.innerHTML =
+                            '<div class=\"squad-cover\">' +
+                                '<div class=\"squad-status ' + ((s.status === 'RECRUITING') ? 'recruiting' : '') + '\">' + ((s.status === 'RECRUITING') ? '招募中' : '满员') + '</div>' +
+                            '</div>' +
+                            '<div class=\"squad-body\">' +
+                                '<div class=\"squad-avatar-main\">👥</div>' +
+                                '<div class=\"squad-name\">' + s.name + '</div>' +
+                                '<div class=\"squad-desc\">' + (s.description || '') + '</div>' +
+                                '<div class=\"squad-tags\">' + tags.map(t => '<span class=\"tag-mini\">' + t + '</span>').join('') + '</div>' +
+                                '<div class=\"squad-meta\"><span><i class=\"fas fa-users\"></i> ' + (s.currentMembers || 0) + '/' + (s.maxMembers || '-') + ' 人</span></div>' +
+                            '</div>';
+                        results.appendChild(card);
+                    });
+                } catch (e) {
+                    document.getElementById('tip').textContent = '搜索失败：网络错误';
+                }
+            }
+            btn.addEventListener('click', function() {
+                const kw = (input.value || '').trim();
+                renderByTag(kw);
+            });
+            const params = new URLSearchParams(window.location.search);
+            const pre = (params.get('q') || '').trim();
+            if (pre) {
+                input.value = pre;
+                renderByTag(pre);
+            }
+        });
+    </script>
+</body>
+</html>

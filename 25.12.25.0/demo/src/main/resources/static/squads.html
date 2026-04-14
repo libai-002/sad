@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的小队 - FunZone</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="/dashboard.html" class="brand-logo" style="text-decoration: none;">Fun<span>Zone</span></a>
+            <div class="nav-links">
+                <a href="/dashboard.html">组队大厅</a>
+                <a href="http://localhost:8081/squads.html" class="active">我的小队</a>
+                <a href="/squads-world.html">小队天地</a>
+                <a href="/search/index.html">搜索</a>
+            </div>
+        </div>
+        <div class="nav-right">
+            <div class="user-profile">
+                <a href="/profile.html" style="display: flex; align-items: center; text-decoration: none; color: inherit;">
+                    <div class="avatar" id="userAvatar">U</div>
+                    <span id="userNameDisplay" style="font-weight: 600; font-size: 0.9rem; margin-left: 0.5rem;">User</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container" style="grid-template-columns: 1fr;">
+        <main class="content-area">
+            <div class="section-header">
+                <h2 style="font-size: 1.2rem;">我的小队</h2>
+                <a href="/squads-world.html" style="color: var(--primary-color); font-size: 0.9rem; text-decoration: none;">进入小队天地</a>
+            </div>
+
+            <div class="squad-grid">
+                <div class="squad-card">
+                    <div class="squad-cover" style="background: linear-gradient(135deg, #74b9ff, #6c5ce7);">
+                        <div class="squad-status recruiting">创建</div>
+                    </div>
+                    <div class="squad-body">
+                        <div class="squad-avatar-main">🛠</div>
+                        <div class="squad-name">创建小队</div>
+                        <div class="form-group">
+                            <label>名称</label>
+                            <input id="createName" class="form-control" type="text" placeholder="例如：一起刷题" />
+                        </div>
+                        <div class="form-group">
+                            <label>简介</label>
+                            <input id="createDesc" class="form-control" type="text" placeholder="一句话介绍" />
+                        </div>
+                        <div class="form-group">
+                            <label>标签</label>
+                            <input id="createTags" class="form-control" type="text" placeholder="例如：学习,打卡" />
+                        </div>
+                        <div class="form-group">
+                            <label>人数上限</label>
+                            <input id="createMax" class="form-control" type="number" min="2" max="100" value="10" />
+                        </div>
+                        <button id="createBtn" class="btn-primary" style="margin-top: 0.5rem;">创建</button>
+                        <div id="createTip" class="suggestions" style="text-align:left;">将创建到后台数据库</div>
+                    </div>
+                </div>
+
+                <div class="squad-card">
+                    <div class="squad-cover" style="background: linear-gradient(135deg, #00cec9, #00b894);">
+                        <div class="squad-status recruiting">加入</div>
+                    </div>
+                    <div class="squad-body">
+                        <div class="squad-avatar-main">🔗</div>
+                        <div class="squad-name">加入小队</div>
+                        <div class="squad-desc">通过邀请码或小队编号加入现有小队。</div>
+                        <div class="form-group">
+                            <label>小队ID或邀请码</label>
+                            <input id="joinCode" class="form-control" type="text" placeholder="例如：1 或 ABCD2345" />
+                        </div>
+                        <button id="joinBtn" class="btn-primary" style="margin-top: 0.5rem;">加入</button>
+                        <a href="/squads-world.html" class="btn-outline" style="margin-top: 0.5rem; display:inline-block; padding:0.6rem 1rem; text-decoration:none;">进入小队天地</a>
+                        <div id="joinTip" class="suggestions" style="text-align:left;">输入小队ID或邀请码，点击“加入”即可加入</div>
+                    </div>
+                </div>
+
+                <div class="squad-card">
+                    <div class="squad-cover" style="background: linear-gradient(135deg, #fdcb6e, #e17055);">
+                        <div class="squad-status recruiting">搜索</div>
+                    </div>
+                    <div class="squad-body">
+                        <div class="squad-avatar-main">🔍</div>
+                        <div class="squad-name">搜索小队</div>
+                        <div class="squad-desc">快速查找热门或附近的小队。</div>
+                        <div style="display:flex; gap:0.6rem;">
+                            <a href="/search/index.html" class="btn-primary" style="width:auto; padding:0.6rem 1rem; text-decoration:none;">前往搜索</a>
+                            <button id="quickSearchBtn" class="btn-outline" style="width:auto; padding:0.6rem 1rem;">示例搜索</button>
+                        </div>
+                        <div id="searchTip" class="suggestions" style="text-align:left;">点击“前往搜索”进入完整搜索页</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-card" style="margin-top:1.5rem;">
+                <div class="sidebar-title">我的本地小队</div>
+                <div id="mySquadsList" class="squad-list-mini"></div>
+            </div>
+            
+            <div class="sidebar-card" style="margin-top:1.5rem;">
+                <div class="sidebar-title">已加入小队表</div>
+                <table class="table" style="width:100%;">
+                    <thead>
+                        <tr>
+                            <th>小队ID</th>
+                            <th>小队名称</th>
+                            <th>邀请码</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="joinedTableBody">
+                        <tr><td colspan="4" style="color:#b2bec3;">加载中...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const userStr = localStorage.getItem('currentUser');
+            if (!userStr) {
+                alert('请先登录');
+                window.location.href = 'login.html';
+                return;
+            }
+            const user = JSON.parse(userStr);
+            const username = user.username;
+            document.getElementById('userNameDisplay').textContent = username;
+            document.getElementById('userAvatar').textContent = username.charAt(0).toUpperCase();
+
+            const listEl = document.getElementById('mySquadsList');
+            async function loadSquads() {
+                listEl.innerHTML = '<div style="color:#b2bec3;">加载中...</div>';
+                try {
+                    const ownerId = JSON.parse(localStorage.getItem('currentUser')).id;
+                    const resp = await fetch('/api/squads/by-owner/' + ownerId);
+                    const data = await resp.json();
+                    listEl.innerHTML = '';
+                    if (!resp.ok) {
+                        listEl.innerHTML = '<div style="color:#e17055;">加载失败：' + (data.error || '未知错误') + '</div>';
+                        return;
+                    }
+                    if (!data.length) {
+                        listEl.innerHTML = '<div style="color:#b2bec3;">暂无小队，去创建吧！</div>';
+                        return;
+                    }
+                    data.forEach(s => {
+                        const item = document.createElement('div');
+                        item.className = 'squad-item';
+                        item.innerHTML = '<div class="squad-avatar-mini" style="background:#dfe6e9;">👥</div>' +
+                            '<div><div style="font-weight:600; font-size:0.9rem;">' + s.name + '（ID: ' + s.id + '）</div>' +
+                            '<div style="font-size:0.75rem; color:#b2bec3;">' + (s.description || '无简介') + '</div></div>';
+                        listEl.appendChild(item);
+                    });
+                } catch (e) {
+                    listEl.innerHTML = '<div style="color:#e17055;">加载失败：网络错误</div>';
+                }
+            }
+
+            document.getElementById('createBtn').addEventListener('click', async function() {
+                const name = document.getElementById('createName').value.trim();
+                const description = document.getElementById('createDesc').value.trim();
+                const tags = document.getElementById('createTags').value.trim();
+                const maxMembers = parseInt(document.getElementById('createMax').value, 10) || 10;
+                if (!name) {
+                    document.getElementById('createTip').textContent = '请输入小队名称';
+                    return;
+                }
+                try {
+                    const { id: ownerId } = JSON.parse(localStorage.getItem('currentUser'));
+                    const resp = await fetch('/api/squads', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name, description, tags, maxMembers, ownerId })
+                    });
+                    const data = await resp.json();
+                    if (resp.ok) {
+                        document.getElementById('createTip').textContent = '创建成功：' + data.name + '（ID: ' + data.id + '）';
+                        document.getElementById('createName').value = '';
+                        document.getElementById('createDesc').value = '';
+                        document.getElementById('createTags').value = '';
+                        document.getElementById('createMax').value = '10';
+                        loadSquads();
+                        loadJoinedTable();
+                    } else {
+                        const errorMsg = data.error || (typeof data === 'object' ? Object.values(data)[0] : data);
+                        document.getElementById('createTip').textContent = '创建失败：' + (errorMsg || '未知错误');
+                    }
+                } catch (e) {
+                    document.getElementById('createTip').textContent = '创建失败：网络错误';
+                }
+            });
+
+            document.getElementById('joinBtn').addEventListener('click', async function() {
+                const inputVal = document.getElementById('joinCode').value.trim();
+                if (!inputVal) {
+                    document.getElementById('joinTip').textContent = '请输入小队ID或邀请码';
+                    return;
+                }
+                try {
+                    const cu = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                    const ownerId = cu.id;
+                    if (ownerId) {
+                        const joinedResp = await fetch('/api/squads/joined/' + ownerId);
+                        const joinedList = await joinedResp.json();
+                        if (joinedResp.ok && Array.isArray(joinedList)) {
+                            const already = joinedList.some(s => (''+s.id) === inputVal);
+                            if (already) {
+                                document.getElementById('joinTip').textContent = '已经加入该小队';
+                                return;
+                            }
+                        }
+                    }
+                    const { id: userId } = JSON.parse(localStorage.getItem('currentUser'));
+                    let resp;
+                    if (/^\d+$/.test(inputVal)) {
+                        const probeId = await fetch('/api/squads/by-id/' + inputVal);
+                        const probeIdData = await probeId.json();
+                        if (!probeId.ok) {
+                            const msg = (probeIdData && probeIdData.error) ? probeIdData.error : '小队不存在或已被删除';
+                            document.getElementById('joinTip').textContent = '加入失败：' + msg;
+                            return;
+                        }
+                        if (probeIdData && probeIdData.allowIdJoin === false) {
+                            document.getElementById('joinTip').textContent = '加入失败：该小队已关闭ID邀请，请使用邀请码加入';
+                            return;
+                        }
+                        resp = await fetch('/api/squads/join/by-id', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ userId, squadId: Number(inputVal) })
+                        });
+                    } else {
+                        resp = await fetch('/api/squads/join/by-code', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ userId, inviteCode: inputVal })
+                        });
+                    }
+                    const data = await resp.json();
+                    if (resp.ok) {
+                        document.getElementById('joinTip').textContent = '加入成功：' + (data.name || ('ID ' + data.id));
+                        document.getElementById('joinCode').value = '';
+                        loadJoinedTable();
+                    } else {
+                        const msg = (data && data.error) ? data.error : '未知错误';
+                        document.getElementById('joinTip').textContent = '加入失败：' + msg;
+                    }
+                } catch (e) {
+                    document.getElementById('joinTip').textContent = '加入失败：网络错误';
+                }
+            });
+            
+            document.getElementById('joinCode').addEventListener('keydown', function(ev) {
+                if (ev.key === 'Enter') {
+                    document.getElementById('joinBtn').click();
+                }
+            });
+
+            async function loadJoinedTable() {
+                const cu = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                const ownerId = cu.id;
+                const tbody = document.getElementById('joinedTableBody');
+                tbody.innerHTML = '<tr><td colspan="4" style="color:#b2bec3;">加载中...</td></tr>';
+                if (!ownerId) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="color:#b2bec3;">请先登录</td></tr>';
+                    return;
+                }
+                try {
+                    const listResp = await fetch('/api/squads/joined/' + ownerId);
+                    const list = await listResp.json();
+                    if (!listResp.ok || !Array.isArray(list) || list.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="4" style="color:#b2bec3;">尚未加入任何小队</td></tr>';
+                        return;
+                    }
+                    tbody.innerHTML = '';
+                    list.forEach(function(s) {
+                        const tr = document.createElement('tr');
+                        const codeText = s.inviteCode ? s.inviteCode : '未生成';
+                        tr.innerHTML = '<td>' + s.id + '</td><td>' + s.name + '</td><td><span class="tag-mini" style="margin-right:0.4rem;">' + codeText + '</span><button class="btn-outline copy-code" data-code="' + (s.inviteCode || '') + '" style="padding:0.3rem 0.6rem;">复制</button></td><td><button class="btn-outline leave-one" data-id="' + s.id + '" style="padding:0.4rem 0.8rem;">退出</button></td>';
+                        tbody.appendChild(tr);
+                    });
+                    tbody.querySelectorAll('.leave-one').forEach(function(btn) {
+                        btn.addEventListener('click', async function() {
+                            const squadId = Number(btn.getAttribute('data-id'));
+                            try {
+                                const resp = await fetch('/api/squads/leave/by-id', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ userId: ownerId, squadId })
+                                });
+                                const data = await resp.json();
+                                if (resp.ok) {
+                                    document.getElementById('joinTip').textContent = '已退出';
+                                    loadJoinedTable();
+                                } else {
+                                    alert('退出失败');
+                                }
+                            } catch (e) {
+                                alert('退出失败');
+                            }
+                        });
+                    });
+                    tbody.querySelectorAll('.copy-code').forEach(function(btn) {
+                        btn.addEventListener('click', function() {
+                            const code = btn.getAttribute('data-code');
+                            if (!code) {
+                                alert('该小队尚未生成邀请码');
+                                return;
+                            }
+                            navigator.clipboard.writeText(code).then(function() {
+                                document.getElementById('joinTip').textContent = '已复制邀请码：' + code;
+                            }).catch(function() {
+                                alert('复制失败');
+                            });
+                        });
+                    });
+                } catch (e) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="color:#b2bec3;">尚未加入任何小队</td></tr>';
+                }
+            }
+            
+            async function checkAlreadyJoined() {
+                try {
+                    const cu = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                    const ownerId = cu.id;
+                    if (!ownerId) return;
+                    const listResp = await fetch('/api/squads/joined/' + ownerId);
+                    const list = await listResp.json();
+                    if (listResp.ok && Array.isArray(list) && list.length > 0) {
+                        document.getElementById('joinTip').textContent = '已经加入';
+                    }
+                } catch (e) {}
+            }
+
+            loadSquads();
+            loadJoinedTable();
+            checkAlreadyJoined();
+        });
+    </script>
+</body>
+</html>
